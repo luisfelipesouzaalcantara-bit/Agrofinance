@@ -1,0 +1,310 @@
+
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#071b18">
+<title>Laktos Agro</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:#071b18;color:#effff7;font-family:Arial,sans-serif;padding-bottom:80px}
+header{padding:22px;background:#0d2923;border-bottom:1px solid #24503e}
+header h1{color:#18d29b;margin:0;font-size:27px}
+header p{color:#9dbbb0;font-size:12px}
+main{padding:15px;max-width:850px;margin:auto}
+.page{display:none}.page.active{display:block}
+h2{margin:12px 0 17px;font-size:21px}
+h3{color:#19d29b;font-size:15px;margin:0 0 13px}
+.card{background:#102b25;border:1px solid #254b3d;padding:15px;border-radius:14px;margin-bottom:13px}
+.grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
+.stat{font-size:24px;color:#19d29b;font-weight:bold;margin-top:8px}
+small{color:#a6c0b4}
+input,select,textarea{width:100%;padding:12px;background:#081c18;border:1px solid #345447;border-radius:9px;color:white;margin:7px 0 12px;font-size:14px}
+label{font-size:12px;color:#aac4b7}
+button{border:0;border-radius:9px;padding:12px;background:#13bf89;color:#05251b;font-weight:bold;cursor:pointer}
+.primary{width:100%}
+.secondary{background:#21483a;color:white}
+.danger{background:#a63c3c;color:white}
+.item{background:#091f19;padding:12px;border-radius:9px;margin:9px 0;border:1px solid #294b3d;line-height:1.5}
+.item strong{color:#22d49d}
+.result{font-size:20px;color:#1cdda1;font-weight:bold;margin:12px 0}
+nav{position:fixed;bottom:0;left:0;width:100%;background:#0c241e;display:flex;overflow-x:auto;z-index:10;border-top:1px solid #315244}
+nav button{background:none;color:#a8c0b5;min-width:75px;font-size:10px;padding:10px 4px}
+nav button.active{color:#1bdfa2}
+nav span{display:block;font-size:19px;margin-bottom:4px}
+.chat{background:#081d18;padding:14px;border-radius:12px;min-height:100px;white-space:pre-wrap;line-height:1.5}
+hr{border:0;border-top:1px solid #315044;margin:14px 0}
+</style>
+</head>
+<body>
+<header>
+<h1>🐄 Laktos Agro</h1>
+<p>Gestão inteligente da sua fazenda leiteira</p>
+</header>
+<main>
+
+<section id="inicio" class="page active">
+<h2>Visão geral</h2>
+<div class="grid">
+<div class="card"><small>Animais</small><div class="stat" id="dAnimais">0</div></div>
+<div class="card"><small>Leite hoje</small><div class="stat" id="dLeite">0 L</div></div>
+<div class="card"><small>Receitas</small><div class="stat" id="dReceita">R$ 0</div></div>
+<div class="card"><small>Despesas</small><div class="stat" id="dDespesa">R$ 0</div></div>
+</div>
+<div class="card"><h3>💰 Saldo da fazenda</h3><div class="stat" id="dSaldo">R$ 0</div></div>
+<div class="card"><h3>📅 Próximos manejos</h3><div id="dAgenda"></div></div>
+<div class="card"><h3>🌱 Dica do dia</h3><p id="dica"></p></div>
+</section>
+
+<section id="rebanho" class="page">
+<h2>🐄 Meu rebanho</h2>
+<div class="card">
+<h3>Cadastrar animal</h3>
+<label>Nome ou brinco</label><input id="aNome" placeholder="Ex: Mimosa 001">
+<label>Categoria</label>
+<select id="aTipo"><option>Vaca em lactação</option><option>Vaca seca</option><option>Novilha</option><option>Bezerra</option><option>Bezerro</option><option>Touro</option></select>
+<label>Raça</label><input id="aRaca" placeholder="Girolando, Holandês...">
+<label>Peso (kg)</label><input id="aPeso" type="number">
+<label>Nascimento</label><input id="aNasc" type="date">
+<label>Observações</label><textarea id="aObs"></textarea>
+<button class="primary" onclick="addAnimal()">Cadastrar animal</button>
+</div>
+<div class="card"><h3>Animais cadastrados</h3><div id="listaAnimais"></div></div>
+</section>
+
+<section id="ordenha" class="page">
+<h2>🥛 Produção de leite</h2>
+<div class="card">
+<h3>Registrar ordenha</h3>
+<select id="lAnimal"></select>
+<label>Data</label><input id="lData" type="date">
+<label>Turno</label><select id="lTurno"><option>Manhã</option><option>Tarde</option><option>Noite</option></select>
+<label>Litros produzidos</label><input id="lQtd" type="number" step=".1">
+<button class="primary" onclick="addLeite()">Salvar ordenha</button>
+</div>
+<div class="card">
+<h3>Produção acumulada</h3><div class="stat" id="lTotal">0 L</div>
+<div id="listaLeite"></div>
+</div>
+</section>
+
+<section id="alimentacao" class="page">
+<h2>🌽 Alimentação</h2>
+<div class="card">
+<h3>Calculadora nutricional</h3>
+<label>Peso do animal em kg</label><input id="peso" type="number" placeholder="Ex: 500">
+<label>Consumo estimado de matéria seca (% do peso)</label><input id="consumo" type="number" value="3" step=".1">
+<label>Matéria seca do alimento (%)</label><input id="materia" type="number" value="40">
+<button class="primary" onclick="calcAlimento()">Calcular</button>
+<div class="result" id="rAlimento"></div>
+<small>Estimativa de matéria seca e equivalente de alimento natural. Não é uma dieta formulada. Ajuste conforme categoria, produção, gestação e qualidade do alimento, com orientação técnica.</small>
+</div>
+<div class="card">
+<h3>Cuidados alimentares</h3>
+<p>🌱 Pastagem de boa qualidade.</p><hr>
+<p>🌽 Silagem bem conservada.</p><hr>
+<p>🌾 Ração adequada à produção.</p><hr>
+<p>🧂 Suplementação mineral correta.</p><hr>
+<p>💧 Água limpa e fresca sempre disponível.</p><hr>
+<p>Evite mudanças bruscas e alimentos mofados.</p>
+</div>
+</section>
+
+<section id="financeiro" class="page">
+<h2>💰 Financeiro</h2>
+<div class="grid">
+<div class="card"><small>Receitas</small><div class="stat" id="fReceita">R$ 0</div></div>
+<div class="card"><small>Despesas</small><div class="stat" id="fDespesa">R$ 0</div></div>
+</div>
+<div class="card"><h3>Nova movimentação</h3>
+<select id="fTipo"><option value="receita">Receita</option><option value="despesa">Despesa</option></select>
+<input id="fDesc" placeholder="Descrição">
+<select id="fCategoria"><option>Venda de leite</option><option>Ração</option><option>Silagem</option><option>Medicamentos</option><option>Energia</option><option>Funcionários</option><option>Combustível</option><option>Manutenção</option><option>Outros</option></select>
+<input id="fValor" type="number" step=".01" placeholder="Valor em R$">
+<input id="fData" type="date">
+<button class="primary" onclick="addFin()">Registrar</button>
+</div>
+<div class="card"><h3>Histórico financeiro</h3><div id="listaFin"></div></div>
+<div class="card">
+<h3>🧮 Calculadora de venda</h3>
+<input id="vLitros" type="number" placeholder="Litros vendidos">
+<input id="vPreco" type="number" step=".01" placeholder="Preço por litro">
+<button class="primary" onclick="calcVenda()">Calcular faturamento</button>
+<div class="result" id="vResultado"></div>
+</div>
+</section>
+
+<section id="saude" class="page">
+<h2>💉 Saúde animal</h2>
+<div class="card">
+<h3>Novo registro sanitário</h3>
+<select id="sAnimal"></select>
+<select id="sTipo"><option>Vacinação</option><option>Vermifugação</option><option>Medicamento</option><option>Consulta veterinária</option><option>Exame</option><option>Sintomas</option><option>Outro</option></select>
+<input id="sDesc" placeholder="Descrição do procedimento">
+<label>Data</label><input id="sData" type="date">
+<label>Próxima data</label><input id="sProx" type="date">
+<textarea id="sObs" placeholder="Observações"></textarea>
+<button class="primary" onclick="addSaude()">Salvar registro</button>
+</div>
+<div class="card"><h3>Histórico sanitário</h3><div id="listaSaude"></div></div>
+<div class="card">
+<h3>⚠️ Sinais de alerta</h3>
+<p>• Falta de apetite.</p><p>• Febre ou tosse.</p><p>• Diarreia.</p><p>• Queda repentina de leite.</p><p>• Úbere quente ou dolorido.</p><p>• Dificuldade para andar.</p><hr>
+Procure um veterinário diante de sintomas. Não medique por conta própria. Respeite a carência dos medicamentos.
+</div>
+</section>
+
+<section id="agenda" class="page">
+<h2>📅 Agenda de manejo</h2>
+<div class="card">
+<h3>Adicionar compromisso</h3>
+<input id="gDesc" placeholder="Ex: Vacinação do rebanho">
+<input id="gAnimal" placeholder="Animal (opcional)">
+<input id="gData" type="date">
+<button class="primary" onclick="addAgenda()">Agendar</button>
+</div>
+<div class="card"><h3>Compromissos</h3><div id="listaAgenda"></div></div>
+</section>
+
+<section id="assistente" class="page">
+<h2>🤖 Assistente Laktos</h2>
+<div class="card">
+<div class="chat" id="chat">Olá! Sou o assistente virtual Laktos Agro. 🐄
+Pergunte sobre alimentação, bezerros, ordenha, saúde e administração da fazenda!</div>
+<input id="pergunta" placeholder="Digite sua pergunta...">
+<button class="primary" onclick="responder()">Enviar pergunta</button>
+<hr><h3>Assuntos rápidos</h3>
+<div class="grid">
+<button onclick="atalho('alimentação')">🌽 Alimentação</button>
+<button onclick="atalho('mastite')">🩺 Mastite</button>
+<button onclick="atalho('bezerros')">🐮 Bezerros</button>
+<button onclick="atalho('ordenha')">🥛 Ordenha</button>
+<button onclick="atalho('reprodução')">🐄 Reprodução</button>
+<button onclick="atalho('economia')">💰 Economia</button>
+<button onclick="atalho('silagem')">🌱 Silagem</button>
+<button onclick="atalho('leite')">📊 Produção</button>
+</div>
+<small>Assistente educativo offline. Não substitui profissionais veterinários ou zootécnicos.</small>
+</div>
+</section>
+
+</main>
+
+<nav>
+<button class="active" onclick="abrir('inicio',this)"><span>🏠</span>Início</button>
+<button onclick="abrir('rebanho',this)"><span>🐄</span>Rebanho</button>
+<button onclick="abrir('ordenha',this)"><span>🥛</span>Ordenha</button>
+<button onclick="abrir('alimentacao',this)"><span>🌽</span>Alimentação</button>
+<button onclick="abrir('financeiro',this)"><span>💰</span>Financeiro</button>
+<button onclick="abrir('saude',this)"><span>💉</span>Saúde</button>
+<button onclick="abrir('agenda',this)"><span>📅</span>Agenda</button>
+<button onclick="abrir('assistente',this)"><span>🤖</span>Assistente</button>
+</nav>
+
+<script>
+const ler=k=>JSON.parse(localStorage.getItem('la_'+k)||'[]');
+const salvar=(k,v)=>localStorage.setItem('la_'+k,JSON.stringify(v));
+let animais=ler('animais'),leites=ler('leites'),fin=ler('fin'),saude=ler('saude'),agenda=ler('agenda');
+const $=id=>document.getElementById(id);
+const hoje=()=>new Date().toLocaleDateString('en-CA');
+const moeda=n=>Number(n||0).toLocaleString('pt-BR',{style:'currency',currency:'BRL'});
+const escapeHTML=s=>String(s||'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+$('lData').value=$('sData').value=$('fData').value=$('gData').value=hoje();
+
+function abrir(id,b){
+document.querySelectorAll('.page').forEach(x=>x.classList.remove('active'));
+document.querySelectorAll('nav button').forEach(x=>x.classList.remove('active'));
+$(id).classList.add('active');b.classList.add('active');
+}
+function excluir(k,id){
+if(!confirm('Excluir este registro?'))return;
+if(k==='animais')animais=animais.filter(x=>x.id!==id);
+if(k==='leites')leites=leites.filter(x=>x.id!==id);
+if(k==='fin')fin=fin.filter(x=>x.id!==id);
+if(k==='saude')saude=saude.filter(x=>x.id!==id);
+if(k==='agenda')agenda=agenda.filter(x=>x.id!==id);
+salvar(k, {animais,leites,fin,saude,agenda}[k]);render();
+}
+function addAnimal(){
+if(!$('aNome').value.trim())return alert('Informe o nome ou brinco.');
+animais.push({id:Date.now(),nome:$('aNome').value,tipo:$('aTipo').value,raca:$('aRaca').value,peso:$('aPeso').value,nasc:$('aNasc').value,obs:$('aObs').value});
+salvar('animais',animais);['aNome','aRaca','aPeso','aNasc','aObs'].forEach(x=>$(x).value='');render();
+}
+function addLeite(){
+let qtd=+$('lQtd').value;
+if(qtd<=0||!$('lData').value)return alert('Informe data e litros.');
+leites.push({id:Date.now(),animal:$('lAnimal').value,turno:$('lTurno').value,data:$('lData').value,qtd});
+salvar('leites',leites);$('lQtd').value='';render();
+}
+function addFin(){
+let valor=+$('fValor').value;
+if(!$('fDesc').value.trim()||valor<=0)return alert('Informe descrição e valor.');
+fin.push({id:Date.now(),tipo:$('fTipo').value,desc:$('fDesc').value,categoria:$('fCategoria').value,valor,data:$('fData').value||hoje()});
+salvar('fin',fin);$('fDesc').value=$('fValor').value='';render();
+}
+function addSaude(){
+if(!$('sDesc').value.trim())return alert('Informe a descrição.');
+saude.push({id:Date.now(),animal:$('sAnimal').value,tipo:$('sTipo').value,desc:$('sDesc').value,data:$('sData').value,prox:$('sProx').value,obs:$('sObs').value});
+salvar('saude',saude);$('sDesc').value=$('sProx').value=$('sObs').value='';render();
+}
+function addAgenda(){
+if(!$('gDesc').value.trim()||!$('gData').value)return alert('Informe descrição e data.');
+agenda.push({id:Date.now(),desc:$('gDesc').value,animal:$('gAnimal').value,data:$('gData').value});
+salvar('agenda',agenda);$('gDesc').value=$('gAnimal').value='';render();
+}
+function calcAlimento(){
+let p=+$('peso').value,c=+$('consumo').value,m=+$('materia').value;
+if(p<=0||c<=0||m<=0||m>100)return alert('Confira os valores.');
+let ms=p*c/100,natural=ms/(m/100);
+$('rAlimento').innerHTML=`Matéria seca: ${ms.toFixed(2)} kg/dia<br>Equivalente do alimento: ${natural.toFixed(2)} kg/dia`;
+}
+function calcVenda(){
+let total=+$('vLitros').value*+$('vPreco').value;
+$('vResultado').textContent=moeda(total);
+}
+function responder(){
+let p=$('pergunta').value.toLowerCase().trim();
+if(!p)return;
+let r='Posso ajudar! Consulte um veterinário ou zootecnista para decisões específicas do seu rebanho.';
+if(/mastite|úbere/.test(p))r='Mastite pode causar alterações no leite, inchaço, calor e dor no úbere. Separe o leite suspeito conforme orientação veterinária, faça avaliação e higiene rigorosa. Não utilize medicamentos sem orientação.';
+else if(/bezerro|bezerra/.test(p))r='O bezerro precisa receber colostro de boa qualidade o mais cedo possível após o nascimento, ter umbigo higienizado, abrigo limpo e acompanhamento de peso e saúde. Peça ao veterinário um protocolo adequado.';
+else if(/alimenta|ração|comer|nutri/.test(p))r='A dieta deve considerar peso, categoria, fase de lactação e produção. Água, volumoso de qualidade e balanceamento de nutrientes são fundamentais. Evite mudanças bruscas.';
+else if(/ordenha|leite/.test(p))r='Mantenha horários regulares, higienize os tetos antes e depois da ordenha conforme protocolo, descarte leite anormal e faça manutenção dos equipamentos.';
+else if(/reprodu|prenhez|gestação/.test(p))r='Registre coberturas, inseminações, diagnósticos de gestação e previsões de parto. O acompanhamento veterinário ajuda a identificar problemas reprodutivos.';
+else if(/econom|lucro|despesa/.test(p))r='Registre todos os custos, especialmente alimentação, medicamentos, mão de obra e energia. Compare custo por litro produzido e preço de venda para entender sua margem.';
+else if(/silagem/.test(p))r='Observe cheiro, cor, textura e presença de mofo na silagem. Descarte material deteriorado e mantenha o silo bem vedado.';
+else if(/vacina|preven/.test(p))r='Mantenha calendário sanitário orientado por veterinário, considerando região, idade e riscos da propriedade. Registre lote, data e reforços.';
+$('chat').textContent='Você: '+p+'\n\nLaktos: '+r;
+$('pergunta').value='';
+}
+function atalho(t){$('pergunta').value='Como cuidar de '+t+'?';responder()}
+const dicas=['Água limpa e fresca deve estar disponível o dia inteiro.','Observe diariamente o comportamento e o apetite dos animais.','Mantenha a sala de ordenha limpa e organizada.','Registre a produção individual para identificar quedas.','Faça controle de estoque de ração e medicamentos.','Mantenha os bezerros em ambiente seco e limpo.','Siga o calendário sanitário com orientação veterinária.'];
+function render(){
+let rec=fin.filter(x=>x.tipo==='receita').reduce((a,x)=>a+x.valor,0);
+let des=fin.filter(x=>x.tipo==='despesa').reduce((a,x)=>a+x.valor,0);
+let leiteHoje=leites.filter(x=>x.data===hoje()).reduce((a,x)=>a+x.qtd,0);
+$('dAnimais').textContent=animais.length;
+$('dLeite').textContent=leiteHoje.toFixed(1)+' L';
+$('dReceita').textContent=moeda(rec);
+$('dDespesa').textContent=moeda(des);
+$('dSaldo').textContent=moeda(rec-des);
+$('fReceita').textContent=moeda(rec);
+$('fDespesa').textContent=moeda(des);
+$('dAgenda').innerHTML=agenda.filter(x=>x.data>=hoje()).sort((a,b)=>a.data.localeCompare(b.data)).slice(0,5).map(x=>`<div class="item">${escapeHTML(x.data)} • ${escapeHTML(x.desc)} ${escapeHTML(x.animal)} <button class="danger" onclick="excluir('agenda',${x.id})">X</button></div>`).join('')||'Nenhum manejo agendado.';
+$('dica').textContent=dicas[new Date().getDate()%dicas.length];
+$('resumo').textContent=`Você possui ${animais.length} animais, ${leites.length} registros de ordenha e ${agenda.length} compromissos cadastrados.`;
+$('listaAnimais').innerHTML=animais.map(x=>`<div class="item"><strong>${escapeHTML(x.nome)}</strong><br>${escapeHTML(x.tipo)} • ${escapeHTML(x.raca)}<br>Peso: ${escapeHTML(x.peso||'Não informado')} kg<br>Nascimento: ${escapeHTML(x.nasc||'Não informado')}<br>${escapeHTML(x.obs)}<br><button class="danger" onclick="excluir('animais',${x.id})">Excluir</button></div>`).join('')||'Nenhum animal cadastrado.';
+let opts='<option value="">Selecione um animal</option>'+animais.map(x=>`<option>${escapeHTML(x.nome)}</option>`).join('');
+$('lAnimal').innerHTML=opts;$('sAnimal').innerHTML=opts;
+let total=leites.reduce((a,x)=>a+x.qtd,0);
+$('lTotal').textContent=total.toFixed(1)+' L';
+$('listaLeite').innerHTML=leites.slice().reverse().map(x=>`<div class="item"><strong>${escapeHTML(x.animal)}</strong> • ${escapeHTML(x.turno)}<br>${escapeHTML(x.data)} • ${x.qtd} litros <button class="danger" onclick="excluir('leites',${x.id})">X</button></div>`).join('')||'Nenhum registro.';
+$('listaFin').innerHTML=fin.slice().reverse().map(x=>`<div class="item"><strong>${x.tipo==='receita'?'ENTRADA':'SAÍDA'} • ${moeda(x.valor)}</strong><br>${escapeHTML(x.desc)} • ${escapeHTML(x.categoria)}<br>${escapeHTML(x.data)} <button class="danger" onclick="excluir('fin',${x.id})">X</button></div>`).join('')||'Nenhuma movimentação.';
+$('listaSaude').innerHTML=saude.slice().reverse().map(x=>`<div class="item"><strong>${escapeHTML(x.tipo)}</strong><br>${escapeHTML(x.animal)} • ${escapeHTML(x.desc)}<br>Data: ${escapeHTML(x.data)}<br>Próxima: ${escapeHTML(x.prox||'Não informada')}<br>${escapeHTML(x.obs)}<button class="danger" onclick="excluir('saude',${x.id})">Excluir</button></div>`).join('')||'Nenhum registro.';
+$('listaAgenda').innerHTML=agenda.slice().sort((a,b)=>a.data.localeCompare(b.data)).map(x=>`<div class="item"><strong>${escapeHTML(x.desc)}</strong><br>${escapeHTML(x.data)} • ${escapeHTML(x.animal)}<br><button class="danger" onclick="excluir('agenda',${x.id})">Excluir</button></div>`).join('')||'Nenhum compromisso.';
+}
+render();
+</script>
+</body>
+</html>
